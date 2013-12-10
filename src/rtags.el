@@ -341,6 +341,7 @@ return t if rtags is allowed to modify this file"
 (define-derived-mode rtags-mode fundamental-mode
   (set (make-local-variable 'font-lock-defaults) '(rtags-font-lock-keywords))
   (setq mode-name "rtags")
+  (setq next-error-function 'rtags-next-function)
   (use-local-map rtags-mode-map)
   (run-hooks 'rtags-mode-hook)
   (goto-char (point-min))
@@ -372,6 +373,12 @@ return t if rtags is allowed to modify this file"
 (defun rtags-next-match () (interactive) (rtags-next-prev-match t))
 ;;;###autoload
 (defun rtags-previous-match () (interactive) (rtags-next-prev-match nil))
+
+(defun rtags-next-function (num reset)
+  "This is for next-error-function, wrapping rtags-next-match and rtags-previous-match"
+  (if (< num 0)
+      (dotimes (i (- num) (rtags-previous-match)))
+    (dotimes (i num (rtags-next-match)))))
 
 (defun rtags-next-prev-suitable-match (next)
   (save-excursion
