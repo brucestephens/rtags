@@ -1252,11 +1252,19 @@ void Server::project(const QueryMessage &query, Connection *conn)
     if (query.query().isEmpty()) {
         const std::shared_ptr<Project> current = currentProject();
         const char *states[] = { "(unloaded)", "(inited)", "(loading)", "(loaded)", "(syncing)" };
-        for (const auto &it : mProjects) {
-            conn->write<128>("%s %s%s", it.first.constData(), states[it.second->state()], it.second == current ? " <=" : "");
-        }
+	std::set<std::string> projectlist;
+	for (const auto& it : mProjects) {
+	    char buf[129];
+	    sprintf(buf, "%s %s%s", it.first.constData(),
+	            states[it.second->state()],
+	            it.second == current ? " <=" : "");
+	    projectlist.insert(buf);
+	}
+	for (const auto& it : projectlist) {
+	    conn->write<128>("%s", it.c_str());
+	}
     } else {
-        std::shared_ptr<Project> selected;
+	std::shared_ptr<Project> selected;
         bool error = false;
         const Match match = query.match();
         const auto it = mProjects.find(match.pattern());

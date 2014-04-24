@@ -658,7 +658,7 @@ std::shared_ptr<Cpp> preprocess(const Source &source,
                                     false, true);
     }
 
-    compilerInstance.createPreprocessor();
+    compilerInstance.createPreprocessor(clang::TU_Complete);
     std::string predefines = compilerInstance.getPreprocessor().getPredefines();
     for (const auto &def : source.defines) {
         predefines += toString(def);
