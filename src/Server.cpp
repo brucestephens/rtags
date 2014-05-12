@@ -660,6 +660,9 @@ void Server::handleQueryMessage(const QueryMessage &message, Connection *conn)
     case QueryMessage::SuspendFile:
         suspendFile(message, conn);
         break;
+    case QueryMessage::GetCompile:
+        getCompileCommand(message, conn);
+        break;
     case QueryMessage::IsIndexing:
         isIndexing(message, conn);
         break;
@@ -1472,6 +1475,33 @@ void Server::suspendFile(const QueryMessage &query, Connection *conn)
                 }
             }
         }
+    }
+    conn->finish();
+}
+
+void Server::getCompileCommand(const QueryMessage& query, Connection* conn)
+{
+    std::shared_ptr<Project> project = projectForQuery(query);
+    if (!project) {
+	conn->write("1\nNo project");
+	conn->finish();
+	return;
+    } else if (project->state() != Project::Loaded) {
+	conn->write("2'nProject loading");
+	conn->finish();
+	return;
+    }
+
+    const Path path = query.match().pattern();
+    const uint32_t fileId = Location::fileId(path);
+    const Source source = project->sources(fileId).value(query.buildIndex());
+    if (!source.isValid() || !source.isIndexable()) {
+	conn->write<512>("3\nNo command known for %s", path.constData());
+    } else {
+	String command
+	    = source.compiler() + " "
+	      + String::join(source.toCommandLine(Source::Default), ' ');
+	conn->write<512>("0\n%s", command.data());
     }
     conn->finish();
 }

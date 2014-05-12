@@ -58,6 +58,7 @@ enum OptionType {
     FindVirtuals,
     FixIts,
     FollowLocation,
+    GetCompile,
     HasFileManager,
     Help,
     IMenu,
@@ -169,6 +170,7 @@ struct Option opts[] = {
     { DumpFile, "dump-file", 'd', required_argument, "Dump source file." },
     { RdmLog, "rdm-log", 'g', no_argument, "Receive logs from rdm." },
     { FixIts, "fixits", 0, required_argument, "Get fixits for file." },
+    { GetCompile, "get-compile", 0, required_argument, "Get compilation arguments to rdm." },
     { RemoveFile, "remove", 'D', required_argument, "Remove file from project." },
     { FindProjectRoot, "find-project-root", 0, required_argument, "Use to check behavior of find-project-root." },
     { FindProjectBuildRoot, "find-project-build-root", 0, required_argument, "Use to check behavior of find-project-root for builds." },
@@ -986,6 +988,26 @@ bool RClient::parse(int &argc, char **argv)
             } else {
                 addCompile(Path::pwd(), args, Escape_Dont);
             }
+            break; }
+        case GetCompile: {
+            Path p;
+            if (optarg) {
+                p = optarg;
+            } else if (optind < argc && argv[optind][0] != '-') {
+                p = argv[optind++];
+            }
+            if (!p.isEmpty()) {
+                if (p == "clear" && !p.exists()) {
+
+                } else {
+                    p.resolve(Path::MakeAbsolute);
+                    if (!p.isFile() && p != "clear") {
+                        fprintf(stderr, "%s is not a file\n", optarg);
+                        return false;
+                    }
+                }
+            }
+            addQuery(QueryMessage::GetCompile, p);
             break; }
         case IsIndexing:
             addQuery(QueryMessage::IsIndexing);

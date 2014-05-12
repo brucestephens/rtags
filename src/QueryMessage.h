@@ -39,6 +39,7 @@ public:
         FindSymbols,
         FixIts,
         FollowLocation,
+	GetCompile,
         HasFileManager,
         Invalid,
         IsIndexed,
