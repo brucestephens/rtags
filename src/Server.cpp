@@ -1479,35 +1479,29 @@ void Server::suspendFile(const QueryMessage &query, Connection *conn)
     conn->finish();
 }
 
-void Server::getCompileCommand(const QueryMessage &query, Connection *conn)
+void Server::getCompileCommand(const QueryMessage& query, Connection* conn)
 {
-    std::shared_ptr<Project> project;
-    const Match match = query.match();
-    if (match.isEmpty()) {
-        project = currentProject();
-    } else {
-        project = updateProjectForLocation(match);
-    }
+    std::shared_ptr<Project> project = projectForQuery(query);
     if (!project) {
-        conn->write("No project");
+	conn->write("No project");
+	conn->finish();
+	return;
     } else if (project->state() != Project::Loaded) {
-        conn->write("Project loading");
+	conn->write("Project loading");
+	conn->finish();
+	return;
+    }
+
+    const Path path = query.match().pattern();
+    const uint32_t fileId = Location::fileId(path);
+    const Source source = project->sources(fileId).value(query.buildIndex());
+    if (!source.isValid() || !source.isIndexable()) {
+	conn->write<512>("No command known for %s", path.constData());
     } else {
-	const Path p = query.match().pattern();
-	if (!p.isFile()) {
-	    conn->write<512>("%s doesn't seem to exist", p.constData());
-	} else {
-	    const uint32_t fileId = Location::insertFile(p);
-	    const SourceInformationMap& infoMap = project->sources();
-	    SourceInformationMap::const_iterator it = infoMap.find(fileId);
-	    if (it == infoMap.end() || it->second.isJS()) {
-		conn->write<512>("No command known for %s", p.constData());
-	    } else {
-		String command = it->second.compiler + " " +
-		    String::join(it->second.args, ' ');
-		conn->write<512>("%s", command.data());
-            }
-	}
+	String command
+	    = source.compiler() + " "
+	      + String::join(source.toCommandLine(Source::Default), ' ');
+	conn->write<512>("%s", command.data());
     }
     conn->finish();
 }

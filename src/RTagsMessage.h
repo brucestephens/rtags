@@ -36,7 +36,8 @@ public:
         ProxyJobAnnouncementId,
         ClientMessageId,
         ClientConnectedId,
-        ExitMessageId
+        ExitMessageId,
+	GetCompileId
     };
 
     RTagsMessage(uint8_t id) : Message(id) {}

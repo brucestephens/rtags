@@ -18,14 +18,12 @@ along with RTags.  If not, see <http://www.gnu.org/licenses/>. */
 
 #include <rct/List.h>
 #include <rct/String.h>
-#include "ClientMessage.h"
+#include "RTagsMessage.h"
 #include "RTags.h"
 
-class GetCompileMessage : public ClientMessage
+class GetCompileMessage : public RTagsMessage
 {
 public:
-    enum { MessageId = GetCompileId };
-
     GetCompileMessage(const Path &cwd = Path(), const String &args = String());
 
     Path workingDirectory() const { return mWorkingDirectory; }

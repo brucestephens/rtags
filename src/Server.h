@@ -151,6 +151,7 @@ private:
     void findFile(const QueryMessage &query, Connection *conn);
     void findSymbols(const QueryMessage &query, Connection *conn);
     void fixIts(const QueryMessage &query, Connection *conn);
+    void getCompileCommand(const QueryMessage &query, Connection *conn);
     void followLocation(const QueryMessage &query, Connection *conn);
     void hasFileManager(const QueryMessage &query, Connection *conn);
     void isIndexed(const QueryMessage &query, Connection *conn);
