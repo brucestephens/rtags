@@ -64,6 +64,7 @@ add_definitions("-DRTAGS_BIN=\"${PROJECT_BINARY_DIR}/bin/\"")
 set(RTAGS_SHARED_SOURCES
   CompileMessage.cpp
   LogOutputMessage.cpp
+  GetCompileMessage.cpp
   Location.cpp
   QueryMessage.cpp
   RTags.cpp)

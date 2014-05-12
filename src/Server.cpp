@@ -660,6 +660,9 @@ void Server::handleQueryMessage(const QueryMessage &message, Connection *conn)
     case QueryMessage::SuspendFile:
         suspendFile(message, conn);
         break;
+    case QueryMessage::GetCompile:
+        getCompileCommand(message, conn);
+        break;
     case QueryMessage::IsIndexing:
         isIndexing(message, conn);
         break;
@@ -1472,6 +1475,39 @@ void Server::suspendFile(const QueryMessage &query, Connection *conn)
                 }
             }
         }
+    }
+    conn->finish();
+}
+
+void Server::getCompileCommand(const QueryMessage &query, Connection *conn)
+{
+    std::shared_ptr<Project> project;
+    const Match match = query.match();
+    if (match.isEmpty()) {
+        project = currentProject();
+    } else {
+        project = updateProjectForLocation(match);
+    }
+    if (!project) {
+        conn->write("No project");
+    } else if (project->state() != Project::Loaded) {
+        conn->write("Project loading");
+    } else {
+	const Path p = query.match().pattern();
+	if (!p.isFile()) {
+	    conn->write<512>("%s doesn't seem to exist", p.constData());
+	} else {
+	    const uint32_t fileId = Location::insertFile(p);
+	    const SourceInformationMap& infoMap = project->sources();
+	    SourceInformationMap::const_iterator it = infoMap.find(fileId);
+	    if (it == infoMap.end() || it->second.isJS()) {
+		conn->write<512>("No command known for %s", p.constData());
+	    } else {
+		String command = it->second.compiler + " " +
+		    String::join(it->second.args, ' ');
+		conn->write<512>("%s", command.data());
+            }
+	}
     }
     conn->finish();
 }
