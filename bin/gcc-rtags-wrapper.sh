@@ -1,5 +1,7 @@
 #!/bin/bash
 
+export HOME=${HOME:-/local/brs}
+
 if [ "$RTAGS_GCC_WRAPPER" = "1" ]; then
     echo 1>&2 "Recursive invocation of gcc-rtags-wrapper.sh detected"
     exit 1
