@@ -235,7 +235,7 @@ bool Server::init(const Options &options)
         Path current = Path(mOptions.dataDir + ".currentProject").readAll(1024);
         if (current.size() > 1) {
             current.chop(1);
-            const auto project = mProjects.value(current);
+            const auto project = mProjects.at(current);
             if (!project) {
                 error() << "Can't restore project" << current;
                 unlink((mOptions.dataDir + ".currentProject").constData());
@@ -1516,7 +1516,7 @@ void Server::handleVisitFileMessage(const std::shared_ptr<VisitFileMessage> &mes
     uint32_t fileId = 0;
     bool visit = false;
 
-    std::shared_ptr<Project> project = mProjects.value(message->project());
+    std::shared_ptr<Project> project = mProjects.at(message->project());
     const uint64_t key = message->key();
     if (project && project->isActiveJob(key)) {
         assert(message->file() == message->file().resolved());

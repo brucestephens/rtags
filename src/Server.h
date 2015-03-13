@@ -100,7 +100,7 @@ public:
     bool runTests();
     const Options &options() const { return mOptions; }
     bool suspended() const { return mSuspended; }
-    std::shared_ptr<Project> project(const Path &path) const { return mProjects.value(path); }
+    std::shared_ptr<Project> project(const Path &path) const { return mProjects.at(path); }
     bool shouldIndex(const Source &source, const Path &project) const;
     void stopServers();
     int mongooseStatistics(struct mg_connection *conn);
@@ -173,7 +173,7 @@ private:
     void connectToServer();
     void startJobs();
 
-    typedef Hash<Path, std::shared_ptr<Project> > ProjectsMap;
+    typedef std::map<Path, std::shared_ptr<Project> > ProjectsMap;
     ProjectsMap mProjects;
     std::weak_ptr<Project> mCurrentProject;
 
