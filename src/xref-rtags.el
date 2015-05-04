@@ -74,7 +74,8 @@
 (defun xref-rtags ()
   (make-variable-buffer-local 'xref-find-function)
   (make-variable-buffer-local 'xref-identifier-at-point-function)
-  ;; (make-variable-buffer-local 'xref-identifier-completion-table-function)
+  (make-variable-buffer-local 'xref-identifier-completion-table-function)
   (setq xref-identifier-at-point-function #'rtags-current-location)
-  (setq xref-find-function #'xref-rtags-function))
+  (setq xref-find-function #'xref-rtags-function)
+  (setq xref-identifier-completion-table-function #'rtags-symbolname-complete))
   
