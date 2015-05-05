@@ -54,7 +54,13 @@
 	   (rtags-reparse-file-if-needed)
 	   (with-current-buffer (rtags-get-buffer)
 	     (rtags-call-rc :path fn :path-filter nil "-f" id)
-	     (xref-rtags-handle-results-buffer))))))
+	     (xref-rtags-handle-results-buffer)))
+	  (t
+	   (rtags-reparse-file-if-needed)
+	   (with-current-buffer (rtags-get-buffer)
+	     (rtags-call-rc :path fn :path-filter nil "-F" id)
+	     (xref-rtags-handle-results-buffer)))
+	   )))
 
 (defun rtags--xref-find-references (id)
   (let ((loc (xref-rtags-location id))
@@ -63,7 +69,13 @@
 	   (rtags-reparse-file-if-needed)
 	   (with-current-buffer (rtags-get-buffer)
 	     (rtags-call-rc :path fn :path-filter nil "-r" id)
-	     (xref-rtags-handle-results-buffer))))))
+	     (xref-rtags-handle-results-buffer)))
+	  (t
+	   (rtags-reparse-file-if-needed)
+	   (with-current-buffer (rtags-get-buffer)
+	     (rtags-call-rc :path fn :path-filter nil "-R" id)
+	     (xref-rtags-handle-results-buffer)))
+	   )))
 
 (defun xref-rtags-function (action id)
   (pcase action
@@ -71,11 +83,15 @@
     (`references (rtags--xref-find-references id))
     (`apropos (rtags--xref-find-apropos id))))
 
+(defun rtags-symbolname-complete-function ()
+  #'rtags-symbolname-complete)
+
 (defun xref-rtags ()
   (make-variable-buffer-local 'xref-find-function)
   (make-variable-buffer-local 'xref-identifier-at-point-function)
   (make-variable-buffer-local 'xref-identifier-completion-table-function)
   (setq xref-identifier-at-point-function #'rtags-current-location)
   (setq xref-find-function #'xref-rtags-function)
-  (setq xref-identifier-completion-table-function #'rtags-symbolname-complete))
+  (setq xref-identifier-completion-table-function #'rtags-symbolname-complete-function))
   
+(provide 'xref-rtags)
